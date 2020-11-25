@@ -17,14 +17,14 @@ class Button(pygame.sprite.Sprite):
         self.renderedText = wordFont.render(self.text, False, self.textColour)
 
         if self.fitBox:
-            textHeight, textWidth = wordFont.size(self.text)
-            self.height = textHeight + 10
+            textWidth, textHeight = wordFont.size(self.text)
             self.width = textWidth + 6
+            self.height = textHeight + 10
         else:
             self.width = width
             self.height = height
 
-        self.image = pygame.Surface([self.height, self.width])
+        self.image = pygame.Surface([self.width, self.height])
         self.image.fill(self.boxColour)
         self.image.blit(self.renderedText, (5, 2))
 
