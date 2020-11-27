@@ -5,7 +5,7 @@ SCREENWIDTH = 950
 SCREENHEIGHT = 950
 size = (SCREENWIDTH, SCREENHEIGHT)
 clock = pygame.time.Clock()
-FPS = 60
+FPS = [60]
 
 carryOn = True
 
@@ -13,21 +13,22 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Maze Game")
 
 screens = pygame.sprite.Group()
-screens.add(screenClass.Screen((255,0,0), [button.Button(325, 200, "Play Game", (0, 0, 0), (255, 255, 255), 50, 1),
-                                           button.Button(300, 300, "High Scores", (0, 0, 0), (255, 255, 255), 50, 2),
-                                           button.Button(340, 500, "Settings", (0, 0, 0), (255, 255, 255), 50, 3)],
-                                          [textBox.TextBox(10, 10, 250, 40, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255))]),
-            screenClass.Screen((0,255,0), [button.Button(100, 100, "Screen 1", (100, 0, 100), (230, 230, 230), 85, -1),
-                                           button.Button(500, 200, "Back", (100, 0, 100), (230, 230, 230), 76, 0)], []),
-            screenClass.Screen((0,0,255), [button.Button(100, 100, "Screen 2", (0, 200, 200), (250, 250, 250), 25, -1),
-                                           button.Button(100, 500, "Back", (0, 200, 200), (250, 250, 250), 48, 0)], []),
-            screenClass.Screen((250,100,255), [button.Button(150, 200, "Screen 3", (0, 200, 200), (250, 250, 250), 14, -1),
-                                           button.Button(750, 450, "Back", (200, 200, 200), (12, 130, 250), 72, 0)], []))
+screens.add(screenClass.Screen((255,0,0), [button.ScreenButton(325, 200, "Play Game", (0, 0, 0), (255, 255, 255), 50, 1),
+                                           button.ScreenButton(300, 300, "High Scores", (0, 0, 0), (255, 255, 255), 50, 2),
+                                           button.ScreenButton(340, 500, "Settings", (0, 0, 0), (255, 255, 255), 50, 3)],
+                                          [textBox.TextBox(10, 10, 250, 40, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255), FPS)]),
+            screenClass.Screen((0,255,0), [button.ScreenButton(100, 100, "Screen 1", (100, 0, 100), (230, 230, 230), 85, None),
+                                           button.ScreenButton(500, 200, "Back", (100, 0, 100), (230, 230, 230), 76, 0)], []),
+            screenClass.Screen((0,0,255), [button.ScreenButton(100, 100, "Screen 2", (0, 200, 200), (250, 250, 250), 25, None),
+                                           button.ScreenButton(100, 500, "Back", (0, 200, 200), (250, 250, 250), 48, 0)], []),
+            screenClass.Screen((250,100,255), [button.ScreenButton(150, 200, "Screen 3", (0, 200, 200), (250, 250, 250), 14, None),
+                                           button.ScreenButton(750, 450, "Back", (200, 200, 200), (12, 130, 250), 72, 0)], []))
 
 currentScreen = pygame.sprite.GroupSingle()
 currentScreen.add(screens.sprites()[0])
 
 while carryOn:
+    ##print(FPS[0])
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             carryOn=False
@@ -35,7 +36,7 @@ while carryOn:
             mousex, mousey = pygame.mouse.get_pos()
             for button in currentScreen.sprite.buttons:
                 index = button.isClicked(mousex, mousey)
-                if index != None and index != -1:
+                if index is not None:
                     currentScreen.add(screens.sprites()[index])
             for box in currentScreen.sprite.textBoxes:
                 box.isClicked(mousex, mousey)
@@ -49,6 +50,6 @@ while carryOn:
     currentScreen.sprite.textBoxes.draw(screen)
 
     pygame.display.flip()
-    clock.tick(FPS)
+    clock.tick(FPS[0])
 
 pygame.quit()
