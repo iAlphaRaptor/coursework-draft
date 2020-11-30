@@ -4,6 +4,7 @@ pygame.init()
 class Button(pygame.sprite.Sprite):
     def __init__(self, x, y, text, textColour, boxColour, fontSize, fitBox=True, width=False, height=False):
         super().__init__()
+        
         self.x = x
         self.y = y
         self.text = text

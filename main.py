@@ -1,4 +1,4 @@
-import pygame, screenClass, button, textBox
+import pygame, screenClass, button, textBox, slider
 pygame.init()
 
 SCREENWIDTH = 950
@@ -13,16 +13,17 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Maze Game")
 
 screens = pygame.sprite.Group()
-screens.add(screenClass.Screen((255,0,0), [button.ScreenButton(325, 200, "Play Game", (0, 0, 0), (255, 255, 255), 50, 1),
+screens.add(screenClass.Screen((255, 0, 0), [button.ScreenButton(325, 200, "Play Game", (0, 0, 0), (255, 255, 255), 50, 1),
                                            button.ScreenButton(300, 300, "High Scores", (0, 0, 0), (255, 255, 255), 50, 2),
                                            button.ScreenButton(340, 500, "Settings", (0, 0, 0), (255, 255, 255), 50, 3)],
-                                          [textBox.TextBox(10, 10, 250, 40, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255), FPS)]),
-            screenClass.Screen((0,255,0), [button.ScreenButton(100, 100, "Screen 1", (100, 0, 100), (230, 230, 230), 85, None),
-                                           button.ScreenButton(500, 200, "Back", (100, 0, 100), (230, 230, 230), 76, 0)], []),
-            screenClass.Screen((0,0,255), [button.ScreenButton(100, 100, "Screen 2", (0, 200, 200), (250, 250, 250), 25, None),
-                                           button.ScreenButton(100, 500, "Back", (0, 200, 200), (250, 250, 250), 48, 0)], []),
-            screenClass.Screen((250,100,255), [button.ScreenButton(150, 200, "Screen 3", (0, 200, 200), (250, 250, 250), 14, None),
-                                           button.ScreenButton(750, 450, "Back", (200, 200, 200), (12, 130, 250), 72, 0)], []))
+                                          [textBox.TextBox(10, 10, 250, 40, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255), FPS)],
+                                          [slider.Slider(20, 750, 750, 50, 0, 50, 2, (0, 0, 0), (0, 0, 255), (10, 240, 10), (133, 43, 209))]),
+            screenClass.Screen((0, 255, 0), [button.ScreenButton(100, 100, "Screen 1", (100, 0, 100), (230, 230, 230), 85, None),
+                                           button.ScreenButton(500, 200, "Back", (100, 0, 100), (230, 230, 230), 76, 0)], [], []),
+            screenClass.Screen((0, 0, 255), [button.ScreenButton(100, 100, "Screen 2", (0, 200, 200), (250, 250, 250), 25, None),
+                                           button.ScreenButton(100, 500, "Back", (0, 200, 200), (250, 250, 250), 48, 0)], [], []),
+            screenClass.Screen((250 , 100, 255), [button.ScreenButton(150, 200, "Screen 3", (0, 200, 200), (250, 250, 250), 14, None),
+                                           button.ScreenButton(750, 450, "Back", (200, 200, 200), (12, 130, 250), 72, 0)], [], []))
 
 currentScreen = pygame.sprite.GroupSingle()
 currentScreen.add(screens.sprites()[0])
@@ -32,7 +33,7 @@ while carryOn:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             carryOn=False
-        if event.type == pygame.MOUSEBUTTONUP:
+        elif event.type == pygame.MOUSEBUTTONUP:
             mousex, mousey = pygame.mouse.get_pos()
             for button in currentScreen.sprite.buttons:
                 index = button.isClicked(mousex, mousey)
@@ -40,6 +41,17 @@ while carryOn:
                     currentScreen.add(screens.sprites()[index])
             for box in currentScreen.sprite.textBoxes:
                 box.isClicked(mousex, mousey)
+            for slider in currentScreen.sprite.sliders:
+                slider.active = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mousex, mousey = pygame.mouse.get_pos()
+            for slider in currentScreen.sprite.sliders:
+                slider.isButtonClicked(mousex, mousey)
+        elif event.type == pygame.MOUSEMOTION:
+            mousex = pygame.mouse.get_pos()[0]
+            for slider in currentScreen.sprite.sliders:
+                if slider.active:
+                    slider.changeValue(mousex)
         elif event.type == pygame.KEYDOWN:
             for box in currentScreen.sprite.textBoxes:
                 if box.active:
@@ -48,6 +60,7 @@ while carryOn:
     currentScreen.draw(screen)
     currentScreen.sprite.buttons.draw(screen)
     currentScreen.sprite.textBoxes.draw(screen)
+    currentScreen.sprite.sliders.draw(screen)
 
     pygame.display.flip()
     clock.tick(FPS[0])
