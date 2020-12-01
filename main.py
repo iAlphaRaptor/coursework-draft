@@ -2,7 +2,7 @@ import pygame, screenClass, widget
 pygame.init()
 
 SCREENWIDTH = 1000
-SCREENHEIGHT = 650
+SCREENHEIGHT = 1000
 size = (SCREENWIDTH, SCREENHEIGHT)
 clock = pygame.time.Clock()
 FPS = [60]
@@ -15,12 +15,11 @@ pygame.display.set_caption("Maze Game")
 screens = pygame.sprite.Group()
 screens.add(screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.ScreenButton(125, 200, "Play Game", (0, 0, 0), (255, 255, 255), 50, 1),
                                                                         widget.ScreenButton(100, 300, "High Scores", (0, 0, 0), (255, 255, 255), 50, 2),
-                                                                        widget.ScreenButton(140, 500, "Settings", (0, 0, 0), (255, 255, 255), 50, 3),
-                                                                        widget.ScreenButton(200, 550, "Quit", (0, 0, 0), (255, 255, 255), 50, -1)],
-                                                                       [widget.TextBox(10, 10, 250, 40, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255), FPS)],
-                                                                       [widget.Slider(20, 600, 750, 50, 0, 50, 2, (0, 0, 0), (0, 0, 255), (10, 240, 10), (133, 43, 209))]),
-            screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (0, 255, 0), [widget.ScreenButton(100, 100, "Screen 1", (100, 0, 100), (230, 230, 230), 85, None),
-                                                                        widget.ScreenButton(500, 200, "Back", (100, 0, 100), (230, 230, 230), 76, 0)], [], []),
+                                                                        widget.ScreenButton(140, 700, "Settings", (0, 0, 0), (255, 255, 255), 50, 3),
+                                                                        widget.ScreenButton(200, 900, "Quit", (0, 0, 0), (255, 255, 255), 50, -1)],
+                                                                       [widget.TextBox(100, 10, 500, 50, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255), FPS)],
+                                                                       [widget.Slider(20, 450, 850, 60, 0, 20, 2, (0, 0, 0), (0, 0, 255), (10, 240, 10), (133, 43, 209))]),
+            screenClass.MazeScreen(SCREENWIDTH, SCREENHEIGHT, (200, 200, 200), (0, 0, 0), 4, 50),
             screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (0, 0, 255), [widget.ScreenButton(100, 100, "Screen 2", (0, 200, 200), (250, 250, 250), 25, None),
                                                                         widget.ScreenButton(100, 500, "Back", (0, 200, 200), (250, 250, 250), 48, 0)], [], []),
             screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (250 , 100, 255), [widget.ScreenButton(150, 200, "Screen 3", (0, 200, 200), (250, 250, 250), 14, None),

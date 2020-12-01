@@ -79,7 +79,7 @@ class TextBox(Widget):
         self.renderedText = self.textFont.render(self.rawText, False, self.textColour)
 
         self.checkButton = pygame.sprite.GroupSingle()
-        self.checkButton.add(EnterButton(self.textFont.size("ENTER")[0]+10, self.height, "ENTER", self.checkTextColour, self.checkBoxColour, self.fontSize, None))
+        self.checkButton.add(EnterButton(self.width+10, 0, "ENTER", self.checkTextColour, self.checkBoxColour, self.fontSize))
 
         self.image = pygame.Surface([self.width + self.checkButton.sprite.width + 15, self.height])
         self.transparentColour = (1,1,1) if (self.activeBoxColour != (1,1,1) and self.passiveBoxColour != (1,1,1) and self.textColour != (1,1,1) and self.checkButton.sprite.boxColour != (1,1,1) and self.checkButton.sprite.textColour != (1,1,1)) else (2,2,2)
@@ -96,15 +96,16 @@ class TextBox(Widget):
         self.image.fill(self.transparentColour)
         pygame.draw.rect(self.image, self.activeBoxColour if self.active else self.passiveBoxColour, (0, 0, self.width, self.height))  ## Draw the main entry box
         self.image.blit(self.renderedText, (5, 2))
-        print(self.checkButton)
         self.checkButton.draw(self.image)
         
 
     def isClicked(self, mousex, mousey):
-        if pygame.Rect(0, 0, self.width, self.height).collidepoint(mousex, mousey):
+        relMouseX = mousex - self.x
+        relMouseY = mousey - self.y
+
+        if pygame.Rect(0, 0, self.width, self.height).collidepoint(relMouseX, relMouseY):
             self.active = True
-        elif pygame.Rect(self.width + 10, 0, self.checkButton.sprite.width, self.checkButton.sprite.height).collidepoint(mousex, mousey):
-            print("EE")
+        elif self.checkButton.sprite.rect.collidepoint(relMouseX, relMouseY):
             self.active = False
             self.variableToChange = [self.rawText]
         else:
@@ -142,7 +143,7 @@ class Slider(Widget):
         self.textFont = pygame.font.Font("Fonts/numberFont.ttf", int(self.height / 1.4))
         self.renderedText = self.textFont.render(str(self.currentValue), False, self.displayColour)
 
-        self.image = pygame.Surface([self.width + 8 + self.textFont.size("0" * len(str(self.maxValue)))[0], self.height])
+        self.image = pygame.Surface([self.width + 12 + self.textFont.size("0" * len(str(self.maxValue)))[0], self.height])
         self.image.fill(self.bgColour)
         self.image.blit(self.renderedText, (self.width+6, 0))
         pygame.draw.rect(self.image, self.sliderColour, (self.buttonRadius, int((self.height / 2) - (self.height * 0.1)), self.sliderWidth, self.sliderHeight))
@@ -156,24 +157,21 @@ class Slider(Widget):
             self.active = False
 
     def changeValue(self, mousex):
-        print("buttonx: ", int(self.buttonPercentage*self.sliderWidth))
         relMousex = mousex - self.x
-        print("relmousex: ", relMousex)
+        mousePercentage = (relMousex - self.buttonRadius) / self.sliderWidth
+        self.buttonPercentage = mousePercentage
 
         if relMousex < self.buttonRadius:
             self.currentValue = self.minValue
         elif relMousex > self.width - self.buttonRadius:
             self.currentValue = self.maxValue
         else:
-            self.currentValue = relMousex // (self.maxValue - self.minValue) + self.minValue
-        print(self.currentValue)
+            self.currentValue = int(round(mousePercentage * self.maxValue, 0)) + self.minValue
 
-        self.buttonPercentage = (self.currentValue - self.minValue) / (self.maxValue - self.minValue)
         self.renderedText = self.textFont.render(str(self.currentValue), False, self.displayColour)
 
-        self.image = pygame.Surface([self.width + 8 + self.textFont.size("0" * len(str(self.maxValue)))[0], self.height])
         self.image.fill(self.bgColour)
         self.image.blit(self.renderedText, (self.width+6, 0))
         pygame.draw.rect(self.image, self.sliderColour, (self.buttonRadius, int((self.height / 2) - (self.height * 0.1)), self.sliderWidth, self.sliderHeight))
-        pygame.draw.circle(self.image, self.buttonColour, (int(round(self.buttonPercentage*self.sliderWidth, 0)), int(round(self.height/2, 0))), self.buttonRadius)
+        pygame.draw.circle(self.image, self.buttonColour, (int(self.currentValue * (self.sliderWidth / (self.maxValue - self.minValue))) + self.buttonRadius, int(round(self.height / 2, 0))), self.buttonRadius)
 
