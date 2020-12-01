@@ -1,15 +1,15 @@
-import pygame, button
+import pygame
 pygame.init()
 
 class Screen(pygame.sprite.Sprite):
-    def __init__(self, bgColour, rawButtons, rawTextBoxes, rawSliders):
+    def __init__(self, SCREENWIDTH, SCREENHEIGHT, bgColour, rawButtons, rawTextBoxes, rawSliders):
         super().__init__()
         self.bgColour = bgColour
         self.rawButtons = rawButtons
         self.rawTextBoxes = rawTextBoxes
         self.rawSliders = rawSliders
 
-        self.image = pygame.Surface([950,950])
+        self.image = pygame.Surface([SCREENWIDTH,SCREENHEIGHT])
         self.image.fill(self.bgColour)
 
         self.rect = self.image.get_rect()
