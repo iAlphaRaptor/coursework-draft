@@ -34,7 +34,7 @@ class MazeScreen(Screen):
         self.wallWidth = wallWidth
         self.cellWidth = cellWidth
         assert SCREENWIDTH % self.cellWidth == 0, "Cell width must be a factor of SCREENWIDTH"
-        assert SCREENHEIGHT % self.cellWidth == 0, "Cell width must be a factor of SCREENHEIGHT"
+        assert SCREENWIDTH == SCREENHEIGHT, "Screen must be a square"
 
         self.cells = []
         for i in range(int(SCREENWIDTH / self.cellWidth)):
@@ -43,6 +43,13 @@ class MazeScreen(Screen):
 
         self.createMaze()
 
+        ## Draw the borders of the maze
+        pygame.draw.line(self.image, self.wallColour, (0, 0), (SCREENWIDTH, 0), self.wallWidth)
+        pygame.draw.line(self.image, self.wallColour, (SCREENWIDTH-self.wallWidth, 0), (SCREENWIDTH-self.wallWidth, SCREENHEIGHT), self.wallWidth)
+        pygame.draw.line(self.image, self.wallColour, (0, 0), (0, SCREENHEIGHT), self.wallWidth)
+        pygame.draw.line(self.image, self.wallColour, (0, SCREENHEIGHT-self.wallWidth), (SCREENWIDTH, SCREENHEIGHT-self.wallWidth), self.wallWidth)
+
+        ## Draw the inner walls of the maze            
         for c in self.cells:
             i = c.x * self.cellWidth
             j = c.y * self.cellWidth
