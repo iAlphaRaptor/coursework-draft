@@ -158,12 +158,13 @@ class Slider(Widget):
 
     def changeValue(self, mousex):
         relMousex = mousex - self.x
+        print(relMousex, self.sliderWidth)
         mousePercentage = (relMousex - self.buttonRadius) / self.sliderWidth
         self.buttonPercentage = mousePercentage
 
         if relMousex < self.buttonRadius:
             self.currentValue = self.minValue
-        elif relMousex > self.width - self.buttonRadius:
+        elif relMousex > self.sliderWidth + self.buttonRadius:
             self.currentValue = self.maxValue
         else:
             self.currentValue = int(round(mousePercentage * self.maxValue, 0)) + self.minValue
