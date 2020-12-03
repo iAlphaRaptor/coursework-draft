@@ -55,11 +55,11 @@ class EnterButton(Button):
         super().__init__(x, y, text, textColour, boxColour, fontSize)
 
     def isClicked(self, mousex, mousey):
-        if self.rect.collidepoint(mousex, mousey):
-            return self.goTo
+        return self.rect.collidepoint(mousex, mousey)
+            
 
 class TextBox(Widget):
-    def __init__(self, x, y, width, fontSize, textColour, activeBoxColour, passiveBoxColour, checkBoxColour, checkTextColour, variableToChange):
+    def __init__(self, x, y, width, fontSize, textColour, activeBoxColour, passiveBoxColour, checkBoxColour, checkTextColour, variableToChange, isInt=False):
         self.textFont = pygame.font.Font("Fonts/numberFont.ttf", fontSize)
         height = self.textFont.size("A")[1]+6
 
@@ -72,10 +72,11 @@ class TextBox(Widget):
         self.checkBoxColour = checkBoxColour
         self.checkTextColour = checkTextColour
         self.variableToChange = variableToChange
+        self.isInt = isInt
         self.active = False
 
         self.rawText = ""
-        self.renderedText = self.textFont.render(self.rawText, False, self.textColour)
+        self.renderedText = self.textFont.render(str(self.rawText), False, self.textColour)
 
         self.checkButton = pygame.sprite.GroupSingle()
         self.checkButton.add(EnterButton(self.width+10, 0, "ENTER", self.checkTextColour, self.checkBoxColour, self.fontSize))
@@ -90,7 +91,7 @@ class TextBox(Widget):
         self.checkButton.draw(self.image)
 
     def updateBox(self):
-        self.renderedText = self.textFont.render(self.rawText, False, self.textColour)
+        self.renderedText = self.textFont.render(str(self.rawText), False, self.textColour)
 
         self.image.fill(self.transparentColour)
         pygame.draw.rect(self.image, self.activeBoxColour if self.active else self.passiveBoxColour, (0, 0, self.width, self.height))  ## Draw the main entry box
@@ -98,23 +99,29 @@ class TextBox(Widget):
         self.checkButton.draw(self.image)
         
 
-    def isClicked(self, mousex, mousey):
+    def isBoxClicked(self, mousex, mousey):
         relMouseX = mousex - self.x
         relMouseY = mousey - self.y
 
         if pygame.Rect(0, 0, self.width, self.height).collidepoint(relMouseX, relMouseY):
             self.active = True
-        elif self.checkButton.sprite.rect.collidepoint(relMouseX, relMouseY):
-            self.active = False
-            self.variableToChange = [self.rawText]
         else:
             self.active = False
         self.updateBox()
 
-    def changeVariable(self):
-        pass
+    def isButtonClicked(self, mousex, mousey):
+        if self.checkButton.sprite.isClicked(mousex, mousey):
+            if self.isInt:
+                try:
+                    self.rawText = int(self.rawText)
+                    return self.rawText
+                except ValueError:
+                    pass
+            else:
+                return self.rawText
 
     def enterText(self, char):
+        self.rawText = str(self.rawText)
         if char == pygame.K_BACKSPACE:
             self.rawText = self.rawText[:-1]
         elif char in alphaNumeric:
@@ -122,7 +129,7 @@ class TextBox(Widget):
         self.updateBox()
 
 class Slider(Widget):
-    def __init__(self, x, y, width, height, minValue, maxValue, currentValue, bgColour, sliderColour, buttonColour, displayColour):
+    def __init__(self, x, y, width, height, minValue, maxValue, currentValue, bgColour, sliderColour, buttonColour, displayColour, variableToChange):
         super().__init__(x, y, width, height)
 
         self.minValue = minValue
@@ -132,7 +139,10 @@ class Slider(Widget):
         self.sliderColour = sliderColour
         self.buttonColour = buttonColour
         self.displayColour = displayColour
+        self.variableToChange = variableToChange
         self.active = False
+
+        assert self.currentValue <= self.maxValue and self.currentValue >= self.minValue, "Current value not in given range of values"
 
         self.buttonRadius = int((self.height - 8) / 2)
         self.buttonPercentage = (self.currentValue - self.minValue) / (self.maxValue - self.minValue)
@@ -168,6 +178,32 @@ class Slider(Widget):
         else:
             self.currentValue = int(round(mousePercentage * self.maxValue, 0)) + self.minValue
 
+        self.renderedText = self.textFont.render(str(self.currentValue), False, self.displayColour)
+        
+        self.image.fill(self.bgColour)
+        self.image.blit(self.renderedText, (self.width+6, 0))
+        pygame.draw.rect(self.image, self.sliderColour, (self.buttonRadius, int((self.height / 2) - (self.height * 0.1)), self.sliderWidth, self.sliderHeight))
+        self.buttonRect = pygame.draw.circle(self.image, self.buttonColour, (int(self.currentValue * (self.sliderWidth / (self.maxValue - self.minValue))) + self.buttonRadius, int(round(self.height / 2, 0))), self.buttonRadius)
+
+class DifficultySlider(Slider):
+    def __init__(self, x, y, width, height, minValue, maxValue, currentValue, bgColour, sliderColour, buttonColour, displayColour, mazeScreen):
+        super().__init__(x, y, width, height, minValue, maxValue, currentValue, bgColour, sliderColour, buttonColour, displayColour, None)
+
+        self.mazeScreen = mazeScreen
+
+    def changeValue(self, mousex):
+        relMousex = mousex - self.x
+        mousePercentage = (relMousex - self.buttonRadius) / self.sliderWidth
+        self.buttonPercentage = mousePercentage
+
+        if relMousex < self.buttonRadius:
+            self.currentValue = self.minValue
+        elif relMousex > self.sliderWidth + self.buttonRadius:
+            self.currentValue = self.maxValue
+        else:
+            self.currentValue = int(round(mousePercentage * self.maxValue, 0)) + self.minValue
+
+        self.mazeScreen.difficulty = self.currentValue
         self.renderedText = self.textFont.render(str(self.currentValue), False, self.displayColour)
         
         self.image.fill(self.bgColour)

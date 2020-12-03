@@ -27,27 +27,24 @@ class Screen(pygame.sprite.Sprite):
             self.sliders.add(s)
 
 class MazeScreen(Screen):
-    def __init__(self, SCREENWIDTH, SCREENHEIGHT, bgColour, wallColour, wallWidth, cellWidth):
+    def __init__(self, SCREENWIDTH, SCREENHEIGHT, bgColour, wallColour, wallWidth, difficulty):
         super().__init__(SCREENWIDTH, SCREENHEIGHT, bgColour, [], [], [])
 
-        self.wallColour = wallColour
-        self.wallWidth = wallWidth
-        self.cellWidth = cellWidth
-        assert SCREENWIDTH % self.cellWidth == 0, "Cell width must be a factor of SCREENWIDTH"
         assert SCREENWIDTH == SCREENHEIGHT, "Screen must be a square"
 
-        self.cells = []
-        for i in range(int(SCREENWIDTH / self.cellWidth)):
-            for j in range(int(SCREENHEIGHT / self.cellWidth)):
-                self.cells.append(cell.Cell(j, i))
+        self.SCREENWIDTH = SCREENWIDTH
+        self.SCREENHEIGHT = SCREENHEIGHT
+        self.wallColour = wallColour
+        self.wallWidth = wallWidth
+        self.difficulty = difficulty
+        self.generated = False
 
-        self.createMaze()
-
+    def drawMaze(self, offset):
         ## Draw the borders of the maze
-        pygame.draw.line(self.image, self.wallColour, (0, 0), (SCREENWIDTH, 0), self.wallWidth)
-        pygame.draw.line(self.image, self.wallColour, (SCREENWIDTH-self.wallWidth, 0), (SCREENWIDTH-self.wallWidth, SCREENHEIGHT), self.wallWidth)
-        pygame.draw.line(self.image, self.wallColour, (0, 0), (0, SCREENHEIGHT), self.wallWidth)
-        pygame.draw.line(self.image, self.wallColour, (0, SCREENHEIGHT-self.wallWidth), (SCREENWIDTH, SCREENHEIGHT-self.wallWidth), self.wallWidth)
+        pygame.draw.line(self.image, self.wallColour, (0, 0), (self.SCREENWIDTH, 0), self.wallWidth)
+        pygame.draw.line(self.image, self.wallColour, (self.SCREENWIDTH-self.wallWidth, 0), (self.SCREENWIDTH-self.wallWidth, self.SCREENHEIGHT), self.wallWidth)
+        pygame.draw.line(self.image, self.wallColour, (0, 0), (0, self.SCREENHEIGHT), self.wallWidth)
+        pygame.draw.line(self.image, self.wallColour, (0, self.SCREENHEIGHT-self.wallWidth), (self.SCREENWIDTH, self.SCREENHEIGHT-self.wallWidth), self.wallWidth)
 
         ## Draw the inner walls of the maze            
         for c in self.cells:
@@ -79,7 +76,13 @@ class MazeScreen(Screen):
             nextCell.walls[2] = 0
             current.walls[0] = 0
 
-    def createMaze(self):
+    def generateMaze(self):
+        self.cellWidth = int(self.SCREENWIDTH / (8 + (2 * self.difficulty)))
+        self.cells = []
+        for i in range(int(self.SCREENWIDTH / self.cellWidth)):
+            for j in range(int(self.SCREENHEIGHT / self.cellWidth)):
+                self.cells.append(cell.Cell(j, i))
+
         stack = []
         current = self.cells[0]
         current.visited = True
@@ -97,4 +100,8 @@ class MazeScreen(Screen):
                 current = nextCell
                 current.visited = True
                 stack.append(current)
+
+        self.generated = True
+        offset = (self.SCREENWIDTH - (self.cellWidth * (len(self.cells) ** 0.5))) / 2
+        self.drawMaze(offset) ## Draw the maze to self.image
 

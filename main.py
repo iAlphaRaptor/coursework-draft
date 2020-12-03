@@ -1,11 +1,11 @@
 import pygame, screenClass, widget
 pygame.init()
 
-SCREENWIDTH = 700
-SCREENHEIGHT = 700
+SCREENWIDTH = SCREENHEIGHT = 700
 size = (SCREENWIDTH, SCREENHEIGHT)
 clock = pygame.time.Clock()
-FPS = [60]
+FPS = 60
+difficulty = 10
 
 carryOn = True
 
@@ -17,25 +17,29 @@ screens.add(screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.S
                                                                         widget.ScreenButton(50, 200, "High Scores", (0, 0, 0), (255, 255, 255), 50, 3),
                                                                         widget.ScreenButton(50, 300, "Settings", (0, 0, 0), (255, 255, 255), 50, 4),
                                                                         widget.ScreenButton(50, 500, "Quit", (0, 0, 0), (255, 255, 255), 50, -1)],
-                                                                       [widget.TextBox(10, 10, 400, 40, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255), FPS)],
-                                                                       [widget.Slider(20, 400, 500, 60, 0, 60, 2, (0, 0, 0), (0, 0, 255), (10, 240, 10), (133, 43, 209))]),
-            screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.ScreenButton(300, 600, "Start", (0, 0, 0), (255, 255, 255), 50, 2)], [],
-                                                                       [widget.Slider(10, 200, 500, 50, 0, 100, 25, (255, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0))]),
-            screenClass.MazeScreen(SCREENWIDTH, SCREENHEIGHT, (200, 200, 200), (0, 0, 0), 2, 25),
+                                                                       [widget.TextBox(10, 10, 400, 40, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255), "FPS", True)],
+                                                                       [widget.Slider(20, 400, 500, 60, 0, 200, 100, (0, 0, 255), (10, 240, 10), (133, 43, 209),  (133, 43, 209), "x")]),
+            screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.ScreenButton(300, 600, "Start", (0, 0, 0), (255, 255, 255), 50, 2),
+                                                                        widget.ScreenButton(300, 100, "BACK", (123, 231, 132), (81, 102, 229), 50, 0)], [],
+                                                                       [widget.DifficultySlider(10, 200, 500, 50, 0, 10, 5, (255, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0), None)]),
+            screenClass.MazeScreen(SCREENWIDTH, SCREENHEIGHT, (200, 200, 200), (0, 0, 0), 2, difficulty),
             screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (0, 0, 255), [widget.ScreenButton(100, 100, "Screen 2", (0, 200, 200), (250, 250, 250), 25, None),
                                                                         widget.ScreenButton(100, 500, "Back", (0, 200, 200), (250, 250, 250), 48, 0)], [], []),
             screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (250 , 100, 255), [widget.ScreenButton(150, 200, "Screen 3", (0, 200, 200), (250, 250, 250), 14, None),
                                                                              widget.ScreenButton(350, 450, "Back", (200, 200, 200), (12, 130, 250), 72, 0)], [], []))
+screens.sprites()[1].sliders.sprites()[0].mazeScreen = screens.sprites()[2]
 
 currentScreen = pygame.sprite.GroupSingle()
 currentScreen.add(screens.sprites()[0])
 
 while carryOn:
-    ##print(FPS[0])
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             carryOn = False
         elif event.type == pygame.MOUSEBUTTONUP:
+            for slider in currentScreen.sprite.sliders:
+                slider.active = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
             mousex, mousey = pygame.mouse.get_pos()
             for button in currentScreen.sprite.buttons:
                 index = button.isClicked(mousex, mousey)
@@ -44,11 +48,10 @@ while carryOn:
                 elif index == -1:
                     carryOn = False
             for box in currentScreen.sprite.textBoxes:
-                box.isClicked(mousex, mousey)
-            for slider in currentScreen.sprite.sliders:
-                slider.active = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mousex, mousey = pygame.mouse.get_pos()
+                box.isBoxClicked(mousex, mousey)
+                boxValue = box.isButtonClicked(mousex, mousey)
+                if boxValue is not None:
+                    globals()[box.variableToChange] = boxValue
             for slider in currentScreen.sprite.sliders:
                 slider.isButtonClicked(mousex, mousey)
         elif event.type == pygame.MOUSEMOTION:
@@ -56,10 +59,14 @@ while carryOn:
             for slider in currentScreen.sprite.sliders:
                 if slider.active:
                     slider.changeValue(mousex)
+                    globals()[slider.variableToChange] = slider.currentValue
         elif event.type == pygame.KEYDOWN:
             for box in currentScreen.sprite.textBoxes:
                 if box.active:
                     box.enterText(event.key)
+
+    if currentScreen.sprite.__class__.__name__ == "MazeScreen" and not currentScreen.sprite.generated:
+        currentScreen.sprite.generateMaze()
 
     currentScreen.draw(screen)
     currentScreen.sprite.buttons.draw(screen)
@@ -67,6 +74,6 @@ while carryOn:
     currentScreen.sprite.sliders.draw(screen)
 
     pygame.display.flip()
-    clock.tick(FPS[0])
+    clock.tick(FPS)
 
 pygame.quit()
