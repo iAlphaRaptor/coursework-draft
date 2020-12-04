@@ -156,7 +156,7 @@ class Slider(Widget):
         self.image.fill(self.bgColour)
         self.image.blit(self.renderedText, (self.width+6, 0))
         pygame.draw.rect(self.image, self.sliderColour, (self.buttonRadius, int((self.height / 2) - (self.height * 0.1)), self.sliderWidth, self.sliderHeight))
-        self.buttonRect = pygame.draw.circle(self.image, self.buttonColour, (int(round(self.buttonPercentage*self.sliderWidth, 0)), int(round(self.height/2, 0))), self.buttonRadius)
+        self.buttonRect = pygame.draw.circle(self.image, self.buttonColour, (int((self.currentValue - self.minValue) * (self.sliderWidth / (self.maxValue - self.minValue))) + self.buttonRadius, int(round(self.height / 2, 0))), self.buttonRadius)
 
     def isButtonClicked(self, mousex, mousey):
         relMouseX = mousex - self.x
@@ -176,15 +176,15 @@ class Slider(Widget):
         elif relMousex > self.sliderWidth + self.buttonRadius:
             self.currentValue = self.maxValue
         else:
-            self.currentValue = int(round(mousePercentage * self.maxValue, 0)) + self.minValue
+            self.currentValue = int(round(mousePercentage * (self.maxValue - self.minValue), 0)) + self.minValue
 
         self.renderedText = self.textFont.render(str(self.currentValue), False, self.displayColour)
         
         self.image.fill(self.bgColour)
-        self.image.blit(self.renderedText, (self.width+6, 0))
+        self.image.blit(self.renderedText, (self.width + 6, 0))
         pygame.draw.rect(self.image, self.sliderColour, (self.buttonRadius, int((self.height / 2) - (self.height * 0.1)), self.sliderWidth, self.sliderHeight))
-        self.buttonRect = pygame.draw.circle(self.image, self.buttonColour, (int(self.currentValue * (self.sliderWidth / (self.maxValue - self.minValue))) + self.buttonRadius, int(round(self.height / 2, 0))), self.buttonRadius)
-
+        self.buttonRect = pygame.draw.circle(self.image, self.buttonColour, (int((self.currentValue - self.minValue) * (self.sliderWidth / (self.maxValue - self.minValue))) + self.buttonRadius, int(round(self.height / 2, 0))), self.buttonRadius)
+        
 class DifficultySlider(Slider):
     def __init__(self, x, y, width, height, minValue, maxValue, currentValue, bgColour, sliderColour, buttonColour, displayColour, mazeScreen):
         super().__init__(x, y, width, height, minValue, maxValue, currentValue, bgColour, sliderColour, buttonColour, displayColour, None)

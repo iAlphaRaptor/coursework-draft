@@ -1,4 +1,4 @@
-import pygame, random, cell
+import pygame, random, cell, player
 pygame.init()
 
 class Screen(pygame.sprite.Sprite):
@@ -39,13 +39,11 @@ class MazeScreen(Screen):
         self.difficulty = difficulty
         self.generated = False
 
-    def drawMaze(self, offset):
-        ## Draw the borders of the maze
-        pygame.draw.line(self.image, self.wallColour, (0, 0), (self.SCREENWIDTH, 0), self.wallWidth)
-        pygame.draw.line(self.image, self.wallColour, (self.SCREENWIDTH-self.wallWidth, 0), (self.SCREENWIDTH-self.wallWidth, self.SCREENHEIGHT), self.wallWidth)
-        pygame.draw.line(self.image, self.wallColour, (0, 0), (0, self.SCREENHEIGHT), self.wallWidth)
-        pygame.draw.line(self.image, self.wallColour, (0, self.SCREENHEIGHT-self.wallWidth), (self.SCREENWIDTH, self.SCREENHEIGHT-self.wallWidth), self.wallWidth)
+        self.players = pygame.sprite.Group()
 
+    def updateMaze(self):
+        self.image.fill(self.bgColour)
+        
         ## Draw the inner walls of the maze            
         for c in self.cells:
             i = c.x * self.cellWidth
@@ -58,6 +56,12 @@ class MazeScreen(Screen):
                 pygame.draw.line(self.image, self.wallColour, (i, j+self.cellWidth), (i+self.cellWidth, j+self.cellWidth), self.wallWidth)
             if c.walls[3]:
                 pygame.draw.line(self.image, self.wallColour, (i, j), (i, j+self.cellWidth), self.wallWidth)
+
+        for player in self.players:
+            player.rect.x = (player.gridX * self.cellWidth) + 1
+            player.rect.y = (player.gridY * self.cellWidth) + 1
+
+        self.players.draw(self.image)
 
     def editWalls(self, current, nextCell):
         xDiff = nextCell.x - current.x;
@@ -76,12 +80,19 @@ class MazeScreen(Screen):
             nextCell.walls[2] = 0
             current.walls[0] = 0
 
+    def generatePlayers(self):
+        user = player.Human(random.randint(0, self.dim-1), random.randint(0, self.dim-1), self.cellWidth)
+        computer = player.Computer(random.randint(0, self.dim-1), random.randint(0, self.dim-1), self.cellWidth)
+
+        self.players.add(user, computer)
+
     def generateMaze(self):
         self.cellWidth = int(self.SCREENWIDTH / (8 + (2 * self.difficulty)))
         self.cells = []
         for i in range(int(self.SCREENWIDTH / self.cellWidth)):
             for j in range(int(self.SCREENHEIGHT / self.cellWidth)):
                 self.cells.append(cell.Cell(j, i))
+        self.dim = len(self.cells) ** 0.5
 
         stack = []
         current = self.cells[0]
@@ -102,6 +113,34 @@ class MazeScreen(Screen):
                 stack.append(current)
 
         self.generated = True
-        offset = (self.SCREENWIDTH - (self.cellWidth * (len(self.cells) ** 0.5))) / 2
-        self.drawMaze(offset) ## Draw the maze to self.image
+        
+        offset = int((self.SCREENWIDTH - (self.cellWidth * (len(self.cells) ** 0.5))) / 2)
+        self.image = pygame.transform.scale(self.image, (self.SCREENWIDTH-2*offset, self.SCREENHEIGHT-2*offset)) ## Resize self.image to fit the maze
+        self.rect = self.image.get_rect()
+        self.rect.x = offset ## Offset the screen so the maze is centered
+        self.rect.y = offset
+
+        self.generatePlayers() ## Create two player objects
+        self.updateMaze() ## Draw the maze to self.image
+
+    def cellIndex(self, x, y):
+        return int((self.dim * y) + x)
+
+    def movePlayer(self, playerIndex, key):
+        player = self.players.sprites()[playerIndex]
+        gridX = player.gridX
+        gridY = player.gridY
+        print(self.cellIndex(gridX, gridY))
+        if key == pygame.K_w:
+            if not self.cells[self.cellIndex(gridX, gridY)].walls[0]:
+                player.move("n")
+        elif key == pygame.K_d:
+            if not self.cells[self.cellIndex(gridX, gridY)].walls[1]:
+                player.move("e")
+        elif key == pygame.K_s:
+            if not self.cells[self.cellIndex(gridX, gridY)].walls[2]:
+                player.move("s")
+        elif key == pygame.K_a:
+            if not self.cells[self.cellIndex(gridX, gridY)].walls[3]:
+                player.move("w")
 
