@@ -1,7 +1,7 @@
-import pygame, screenClass, widget
+import pygame, screenClass, widget, random
 pygame.init()
 
-SCREENWIDTH = SCREENHEIGHT = 700
+SCREENWIDTH = SCREENHEIGHT = 1000
 size = (SCREENWIDTH, SCREENHEIGHT)
 clock = pygame.time.Clock()
 FPS = 60
@@ -68,7 +68,7 @@ while carryOn:
                 if event.key == pygame.K_z:
                     currentScreen.add(screens.sprites()[1])
                 elif event.key in [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d]:
-                    currentScreen.sprite.movePlayer(0, event.key)
+                    currentScreen.sprite.moveUser(event.key)
 
     if currentScreen.sprite.__class__.__name__ == "MazeScreen":
         if not currentScreen.sprite.generated:
@@ -76,6 +76,7 @@ while carryOn:
             screen.fill(currentScreen.sprite.wallColour)
         else:
             currentScreen.sprite.updateMaze()
+            currentScreen.sprite.moveComputer()
 
     currentScreen.draw(screen)
     currentScreen.sprite.buttons.draw(screen)

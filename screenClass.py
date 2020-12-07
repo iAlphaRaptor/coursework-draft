@@ -1,4 +1,4 @@
-import pygame, random, cell, player
+import pygame, random, cell, player, mazeRoutines
 pygame.init()
 
 class Screen(pygame.sprite.Sprite):
@@ -82,7 +82,12 @@ class MazeScreen(Screen):
 
     def generatePlayers(self):
         user = player.Human(random.randint(0, self.dim-1), random.randint(0, self.dim-1), self.cellWidth)
-        computer = player.Computer(random.randint(0, self.dim-1), random.randint(0, self.dim-1), self.cellWidth)
+        computerX = random.randint(0, self.dim-1)
+        computerY = random.randint(0, self.dim-1)
+        while computerX == user.gridX and computerY == user.griY:
+            computerX = random.randint(0, self.dim-1)
+            computerY = random.randint(0, self.dim-1)
+        computer = player.Computer(computerX, computerY, self.cellWidth)
 
         self.players.add(user, computer)
 
@@ -100,7 +105,7 @@ class MazeScreen(Screen):
         stack.append(current)
 
         while len(stack) > 0:
-            possibles = current.getPossibles(self.cells)
+            possibles = mazeRoutines.getNeighbours(current, self.cells)
             if len(possibles) == 0:
                 current = stack.pop()
             else:
@@ -126,11 +131,11 @@ class MazeScreen(Screen):
     def cellIndex(self, x, y):
         return int((self.dim * y) + x)
 
-    def movePlayer(self, playerIndex, key):
-        player = self.players.sprites()[playerIndex]
+    def moveUser(self, key):
+        player = self.players.sprites()[0]
         gridX = player.gridX
         gridY = player.gridY
-        print(self.cellIndex(gridX, gridY))
+
         if key == pygame.K_w:
             if not self.cells[self.cellIndex(gridX, gridY)].walls[0]:
                 player.move("n")
@@ -143,4 +148,7 @@ class MazeScreen(Screen):
         elif key == pygame.K_a:
             if not self.cells[self.cellIndex(gridX, gridY)].walls[3]:
                 player.move("w")
+
+    def moveComputer(self):
+        pass
 
