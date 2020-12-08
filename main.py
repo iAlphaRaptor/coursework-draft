@@ -1,7 +1,7 @@
-import pygame, screenClass, widget, random
+import pygame, screenClass, widget, random, mazeRoutines
 pygame.init()
 
-SCREENWIDTH = SCREENHEIGHT = 1000
+SCREENWIDTH = SCREENHEIGHT = 700
 size = (SCREENWIDTH, SCREENHEIGHT)
 clock = pygame.time.Clock()
 FPS = 60
@@ -19,7 +19,7 @@ screens.add(screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.S
                                                                         widget.ScreenButton(50, 500, "Quit", (0, 0, 0), (255, 255, 255), 50, -1)],
                                                                        [widget.TextBox(10, 10, 400, 40, (0, 0, 0), (225, 225, 225), (255, 255, 255), (0, 163, 7), (255, 255, 255), "FPS", True)],
                                                                        [widget.Slider(20, 400, 500, 60, 3, 10, 3, (0, 0, 255), (10, 240, 10), (133, 43, 209),  (133, 43, 209), "x")]),
-            screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.ScreenButton(300, 600, "Start", (0, 0, 0), (255, 255, 255), 50, 2),
+            screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.ScreenButton(300, 300, "Start", (0, 0, 0), (255, 255, 255), 50, 2),
                                                                         widget.ScreenButton(300, 100, "BACK", (123, 231, 132), (81, 102, 229), 50, 0)], [],
                                                                        [widget.DifficultySlider(10, 200, 500, 50, 0, 20, 5, (255, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0), None)]),
             screenClass.MazeScreen(SCREENWIDTH, SCREENHEIGHT, (200, 200, 200), (0, 0, 0), 1, difficulty),
@@ -73,6 +73,7 @@ while carryOn:
     if currentScreen.sprite.__class__.__name__ == "MazeScreen":
         if not currentScreen.sprite.generated:
             currentScreen.sprite.generateMaze()
+            astar = mazeRoutines.aStar(screens.sprites()[2].cells, (1,1), (10,10))
             screen.fill(currentScreen.sprite.wallColour)
         else:
             currentScreen.sprite.updateMaze()
@@ -82,6 +83,10 @@ while carryOn:
     currentScreen.sprite.buttons.draw(screen)
     currentScreen.sprite.textBoxes.draw(screen)
     currentScreen.sprite.sliders.draw(screen)
+    if currentScreen.sprite.__class__.__name__ == "MazeScreen":
+        for a in astar:
+                    if a != 0:
+                        pygame.draw.rect(screen, (0,0,0), (a[0]*currentScreen.sprite.cellWidth, a[1]*currentScreen.sprite.cellWidth, currentScreen.sprite.cellWidth, currentScreen.sprite.cellWidth))
 
     pygame.display.flip()
     clock.tick(FPS)

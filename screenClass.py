@@ -41,6 +41,25 @@ class MazeScreen(Screen):
 
         self.players = pygame.sprite.Group()
 
+    def getNeighbours(self, current):
+        possibles = []
+
+        n = mazeRoutines.index(self.cells, current.x, current.y+1)
+        e = mazeRoutines.index(self.cells, current.x+1, current.y)
+        s = mazeRoutines.index(self.cells, current.x, current.y-1)
+        w = mazeRoutines.index(self.cells, current.x-1, current.y)
+
+        if n != -1 and not self.cells[n].visited:
+            possibles.append(n)
+        if e != -1 and not self.cells[e].visited:
+            possibles.append(e)
+        if s != -1 and not self.cells[s].visited:
+            possibles.append(s)
+        if w != -1 and not self.cells[w].visited:
+            possibles.append(w)
+
+        return possibles
+
     def updateMaze(self):
         self.image.fill(self.bgColour)
         
@@ -84,7 +103,7 @@ class MazeScreen(Screen):
         user = player.Human(random.randint(0, self.dim-1), random.randint(0, self.dim-1), self.cellWidth)
         computerX = random.randint(0, self.dim-1)
         computerY = random.randint(0, self.dim-1)
-        while computerX == user.gridX and computerY == user.griY:
+        while computerX == user.gridX and computerY == user.gridY:
             computerX = random.randint(0, self.dim-1)
             computerY = random.randint(0, self.dim-1)
         computer = player.Computer(computerX, computerY, self.cellWidth)
@@ -105,7 +124,7 @@ class MazeScreen(Screen):
         stack.append(current)
 
         while len(stack) > 0:
-            possibles = mazeRoutines.getNeighbours(current, self.cells)
+            possibles = self.getNeighbours(current)
             if len(possibles) == 0:
                 current = stack.pop()
             else:
