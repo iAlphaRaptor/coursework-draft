@@ -9,20 +9,17 @@ def getXY(data, index):
 	l = len(data) ** 0.5
 	x = int(index // l)
 	y = int(index % l)
-	return x, y
+	return y, x
 
 def getNeighbours(current, cells):
 		possibles = []
-		print(current, "cur")
 
 		current = cells[index(cells, current[0], current[1])]
 
-		n = index(cells, current.x, current.y+1)
+		n = index(cells, current.x, current.y-1)
 		e = index(cells, current.x+1, current.y)
-		s = index(cells, current.x, current.y-1)
+		s = index(cells, current.x, current.y+1)
 		w = index(cells, current.x-1, current.y)
-		print(n,e,s,w, "dir")
-		print(current.walls, "W")
 
 		if n != -1 and not current.walls[0]:
 			possibles.append(n)
@@ -47,13 +44,17 @@ def h(n, goal):
 	return round(a, 2) ## Efficiency and that
 
 
-def reconstructPath(cameFrom, current):
-	return cameFrom
+def reconstructPath(cameFrom, current, start, maze):
+	path = [current]
+	while current != start:
+		current = cameFrom[index(maze, current[0], current[1])]
+		path.append(current)
+	return path[::-1]
 
 def aStar(maze, start, goal):
 	""" Returns a list of directions to get from 'start' to 'end'.
 	'start' and 'goal' are tuples of co-ordinates (x,y). """
-
+	print(start, goal)
 	openSet = [start]
 	cameFrom = [0 for x in range(len(maze))]
 
@@ -71,11 +72,10 @@ def aStar(maze, start, goal):
 				current = value
 
 		if current == goal:
-			return reconstructPath(cameFrom, current)
+			return reconstructPath(cameFrom, current, start, maze)
 
 		openSet.remove(current)
 		neighbours = getNeighbours(current, maze)
-		print(neighbours, "neigh")
 		for neighbour in neighbours:
 			tentativeG = gScore[index(maze, current[0], current[1])] + 1
 			mazeIndex = index(maze, neighbour[0], neighbour[1])

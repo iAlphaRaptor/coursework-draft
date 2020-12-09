@@ -44,9 +44,9 @@ class MazeScreen(Screen):
     def getNeighbours(self, current):
         possibles = []
 
-        n = mazeRoutines.index(self.cells, current.x, current.y+1)
+        n = mazeRoutines.index(self.cells, current.x, current.y-1)
         e = mazeRoutines.index(self.cells, current.x+1, current.y)
-        s = mazeRoutines.index(self.cells, current.x, current.y-1)
+        s = mazeRoutines.index(self.cells, current.x, current.y+1)
         w = mazeRoutines.index(self.cells, current.x-1, current.y)
 
         if n != -1 and not self.cells[n].visited:
