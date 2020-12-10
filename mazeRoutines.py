@@ -54,7 +54,7 @@ def reconstructPath(cameFrom, current, start, maze):
 def aStar(maze, start, goal):
 	""" Returns a list of directions to get from 'start' to 'end'.
 	'start' and 'goal' are tuples of co-ordinates (x,y). """
-	print(start, goal)
+
 	openSet = [start]
 	cameFrom = [0 for x in range(len(maze))]
 

@@ -37,6 +37,8 @@ class MazeScreen(Screen):
         self.wallColour = wallColour
         self.wallWidth = wallWidth
         self.difficulty = difficulty
+        self.finish = False
+        self.enemyPath = False
         self.generated = False
 
         self.players = pygame.sprite.Group()
@@ -81,6 +83,9 @@ class MazeScreen(Screen):
             player.rect.y = (player.gridY * self.cellWidth) + 1
 
         self.players.draw(self.image)
+
+        if self.finish:
+            pygame.draw.rect(self.image, (255, 0, 0), (self.finish[0] * self.cellWidth + 1, self.finish[1] * self.cellWidth + 1, self.cellWidth - 1, self.cellWidth - 1))
 
     def editWalls(self, current, nextCell):
         xDiff = nextCell.x - current.x;
@@ -169,5 +174,17 @@ class MazeScreen(Screen):
                 player.move("w")
 
     def moveComputer(self):
-        pass
+        if self.enemyPath:
+            enemy = self.players.sprites()[1]
+            nextMove = self.enemyPath.pop(0)
+
+            enemy.gridX = nextMove[0]
+            enemy.gridY = nextMove[1]
+
+    def winCheck(self):
+        for player in self.players.sprites():
+            if (player.gridX, player.gridY) == self.finish:
+                self.completed = True
+                return str(self.players.sprites().index(player))
+        return False
 

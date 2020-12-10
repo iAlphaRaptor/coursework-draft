@@ -8,6 +8,7 @@ FPS = 60
 difficulty = 5
 
 carryOn = True
+winner = False
 
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Maze Game")
@@ -21,7 +22,7 @@ screens.add(screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.S
                                                                        [widget.Slider(20, 400, 500, 60, 3, 10, 3, (0, 0, 255), (10, 240, 10), (133, 43, 209),  (133, 43, 209), "x")]),
             screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (255, 0, 0), [widget.ScreenButton(300, 300, "Start", (0, 0, 0), (255, 255, 255), 50, 2),
                                                                         widget.ScreenButton(300, 100, "BACK", (123, 231, 132), (81, 102, 229), 50, 0)], [],
-                                                                       [widget.DifficultySlider(10, 200, 500, 50, 0, 20, difficulty, (255, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0), None)]),
+                                                                       [widget.DifficultySlider(10, 200, 500, 50, 0, 100, difficulty, (255, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0), None)]),
             screenClass.MazeScreen(SCREENWIDTH, SCREENHEIGHT, (200, 200, 200), (0, 0, 0), 1, difficulty),
             screenClass.Screen(SCREENWIDTH, SCREENHEIGHT, (0, 0, 255), [widget.ScreenButton(100, 100, "Screen 2", (0, 200, 200), (250, 250, 250), 25, None),
                                                                         widget.ScreenButton(100, 500, "Back", (0, 200, 200), (250, 250, 250), 48, 0)], [], []),
@@ -73,21 +74,29 @@ while carryOn:
     if currentScreen.sprite.__class__.__name__ == "MazeScreen":
         if not currentScreen.sprite.generated:
             currentScreen.sprite.generateMaze()
-            astar = mazeRoutines.aStar(screens.sprites()[2].cells, (currentScreen.sprite.players.sprites()[0].x, currentScreen.sprite.players.sprites()[0].y), (currentScreen.sprite.players.sprites()[1].x,currentScreen.sprite.players.sprites()[1].y))
+            playerToEnemy = mazeRoutines.aStar(screens.sprites()[2].cells, (currentScreen.sprite.players.sprites()[0].gridX, currentScreen.sprite.players.sprites()[0].gridY), (currentScreen.sprite.players.sprites()[1].gridX,currentScreen.sprite.players.sprites()[1].gridY))
+            currentScreen.sprite.finish = playerToEnemy[len(playerToEnemy) // 2]
+            currentScreen.sprite.enemyPath = playerToEnemy[len(playerToEnemy) // 2:]
+            currentScreen.sprite.enemyPath = currentScreen.sprite.enemyPath[::-1]
+
             screen.fill(currentScreen.sprite.wallColour)
         else:
             currentScreen.sprite.updateMaze()
-            currentScreen.sprite.moveComputer()
+            if pygame.time.get_ticks() % 30 == 0:
+                currentScreen.sprite.moveComputer()
+            winner = currentScreen.sprite.winCheck()
 
     currentScreen.draw(screen)
     currentScreen.sprite.buttons.draw(screen)
     currentScreen.sprite.textBoxes.draw(screen)
     currentScreen.sprite.sliders.draw(screen)
     if currentScreen.sprite.__class__.__name__ == "MazeScreen":
-        for a in astar:
+        for a in playerToEnemy:
             if a != 0:
-                pygame.draw.rect(screen, (0,0,255), (a[0]*currentScreen.sprite.cellWidth+10, a[1]*currentScreen.sprite.cellWidth+10, currentScreen.sprite.cellWidth-15, currentScreen.sprite.cellWidth-15))
-                #pass
+                #pygame.draw.rect(screen, (0,0,255), (a[0]*currentScreen.sprite.cellWidth+10, a[1]*currentScreen.sprite.cellWidth+10, currentScreen.sprite.cellWidth-15, currentScreen.sprite.cellWidth-15))
+                pass
+    if winner:
+        screen.fill((132,22,202))
     pygame.display.flip()
     clock.tick(FPS)
 
