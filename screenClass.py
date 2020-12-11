@@ -37,6 +37,8 @@ class MazeScreen(Screen):
         self.wallColour = wallColour
         self.wallWidth = wallWidth
         self.difficulty = difficulty
+        self.enemyPath = False
+        self.finish = False
         self.generated = False
 
         self.players = pygame.sprite.Group()
@@ -79,6 +81,9 @@ class MazeScreen(Screen):
         for player in self.players:
             player.rect.x = (player.gridX * self.cellWidth) + 1
             player.rect.y = (player.gridY * self.cellWidth) + 1
+
+        if self.finish:
+            pygame.draw.rect(self.image, (255, 255, 255), (self.finish[0] * self.cellWidth + 1, self.finish[1] * self.cellWidth + 1, self.cellWidth-1, self.cellWidth-1))
 
         self.players.draw(self.image)
 
@@ -137,7 +142,6 @@ class MazeScreen(Screen):
                 stack.append(current)
 
         self.generated = True
-        
         offset = int((self.SCREENWIDTH - (self.cellWidth * (len(self.cells) ** 0.5))) / 2)
         self.image = pygame.transform.scale(self.image, (self.SCREENWIDTH-2*offset, self.SCREENHEIGHT-2*offset)) ## Resize self.image to fit the maze
         self.rect = self.image.get_rect()
@@ -169,5 +173,9 @@ class MazeScreen(Screen):
                 player.move("w")
 
     def moveComputer(self):
-        pass
+        if self.enemyPath:
+            enemy = self.players.sprites()[1]
+            nextMove = self.enemyPath.pop(0)
+            enemy.gridX = nextMove[0]
+            enemy.gridY = nextMove[1]
 
